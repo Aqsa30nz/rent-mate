@@ -38,6 +38,26 @@ export class RentalsService {
     const end = new Date(dto.endDate);
     if (end <= start) throw new BadRequestException('endDate must be after startDate');
 
+    const overlappingRental = await this.prisma.rental.findFirst({
+      where: {
+        listingId: dto.listingId,
+        status: {
+          in: [
+            RentalStatus.payment_pending,
+            RentalStatus.active,
+            RentalStatus.in_use,
+            RentalStatus.return_pending,
+            RentalStatus.deposit_hold,
+          ],
+        },
+        startDate: { lt: end },
+        endDate: { gt: start },
+      },
+    });
+    if (overlappingRental) {
+      throw new BadRequestException('Listing is already booked for the selected dates');
+    }
+
     const days = this.daysBetween(start, end);
     const rentalFeePaise = listing.dailyPricePaise * days;
     const platformFeePercent = Number(this.config.get('PLATFORM_FEE_PERCENT', 10));
@@ -126,8 +146,8 @@ export class RentalsService {
     const rental = await this.prisma.rental.findUnique({
       where: { id },
       include: {
-        listing: { include: { owner: { select: { id: true, name: true, phone: true } } } },
-        renter: { select: { id: true, name: true, phone: true } },
+        listing: { include: { owner: { select: { id: true, name: true } } } },
+        renter: { select: { id: true, name: true } },
         payments: true,
         dispute: { include: { evidence: true } },
         rentalReturn: true,
