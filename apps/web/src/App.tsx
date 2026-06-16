@@ -4,6 +4,7 @@ import { Routes, Route, Link } from 'react-router-dom'
 import AuthPage from './pages/AuthPage'
 import ListingsPage from './pages/ListingsPage'
 import NewListingPage from './pages/NewListingPage'
+import RentalHistoryPage from './pages/RentalHistoryPage'
 import type { ReactNode } from 'react'
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000'
@@ -468,6 +469,7 @@ export default function App() {
       <Route path="/auth" element={<AuthPage />} />
       <Route path="/listings" element={<ListingsPage />} />
       <Route path="/listings/new" element={<NewListingPage />} />
+      <Route path="/rental-history" element={<RentalHistoryPage />} />
     </Routes>
   )
 }
